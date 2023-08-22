@@ -201,7 +201,8 @@ module Kimurai
       visited = delay ? browser.visit(url, delay: delay) : browser.visit(url)
       return unless visited
 
-      public_send(handler, browser.current_response(response_type), { url: url, data: data })
+      request_data = { url: url, data: data }
+      public_send(handler, browser.current_response(response_type), **request_data)
     end
 
     def console(response = nil, url: nil, data: {})
@@ -224,9 +225,9 @@ module Kimurai
       @savers[path] ||= begin
         options = { format: format, position: position, append: append }
         if self.with_info
-          self.class.savers[path] ||= Saver.new(path, options)
+          self.class.savers[path] ||= Saver.new(path, **options)
         else
-          Saver.new(path, options)
+          Saver.new(path, **options)
         end
       end
 
@@ -306,10 +307,10 @@ module Kimurai
               if url_data[:url].present? && url_data[:data].present?
                 spider.request_to(handler, delay, url_data)
               else
-                spider.public_send(handler, url_data)
+                spider.public_send(handler, **url_data)
               end
             else
-              spider.request_to(handler, delay, url: url_data, data: data)
+              spider.request_to(handler, delay, **{ url: url_data, data: data })
             end
           end
         ensure
